@@ -42,19 +42,22 @@ class HoursCalculator{
         }
 
         protected function setClosed(){
-             if( is_int($date) ){
-                $this->recurringOpening[$date] = [$startTime, $endTime];
-            } else if( $this->isValidDate($date) ){
-                call_user_func_array([$this, 'addExceptionOpeningHours'], func_get_args());
-            }
+            $arguments = func_get_args();
         }
 
 
         public function debug(){
-            echo "recurring \n";
-            echo "<pre>".print_r($this->recurringOpeningHours, true)."</pre>";
-            echo "exceptions \n";
-            echo "<pre>".print_r($this->exceptionOpeningHours, true)."</pre>";
+            if( func_num_args() > 0 ){
+                $args = func_get_args();
+                array_walk($args, function( &$v, $key){
+                    echo $key." => ".print_r($v, true)."\n";
+                });
+            } else {
+                echo "recurring \n";
+                echo "<pre>".print_r($this->recurringOpeningHours, true)."</pre>";
+                echo "exceptions \n";
+                echo "<pre>".print_r($this->exceptionOpeningHours, true)."</pre>";
+            }
         }
 
 
