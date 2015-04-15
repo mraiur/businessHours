@@ -33,16 +33,24 @@ class HoursCalculator{
             $this->exceptionOpeningHours[$date] = compact('startTime', 'endTime');
         }
 
+        private function addExceptionNonWorkingDays($date){
+            $this->exceptionNonWorkingDays[] = $date;
+        }
+
         protected function setOpeningHours($date, $startTime, $endTime){
             if( is_int($date) ){
-
+                $this->recurringOpeningHours[$date] = compact('startTime', 'endTime');
             } else if( $this->isValidDate($date) ){
-                call_user_func_array([$this, 'addNonWorkingDays'], func_get_args());
+                call_user_func_array([$this, 'addExceptionOpeningHours'], func_get_args());
             }
         }
 
         private function addClosed($date){
-
+            if( is_int($date) ){
+                $this->recurringNonWorkingDays[] = $date;
+            } else if( $this->isValidDate($date) ){
+                $this->addExceptionNonWorkingDays($date);
+            }
         }
 
         protected function setClosed(){
@@ -58,10 +66,18 @@ class HoursCalculator{
                     echo $key." => ".print_r($v, true)."\n";
                 });
             } else {
-                echo "recurring \n";
+                echo "recurring opening hours\n";
                 echo "<pre>".print_r($this->recurringOpeningHours, true)."</pre>";
-                echo "exceptions \n";
+                echo "exceptions opening hours\n";
                 echo "<pre>".print_r($this->exceptionOpeningHours, true)."</pre>";
+
+                echo "exceptions closed days\n";
+                echo "<pre>".print_r($this->exceptionNonWorkingDays, true)."</pre>";
+
+                echo "recurring closed days\n";
+                echo "<pre>".print_r($this->recurringNonWorkingDays, true)."</pre>";
+
+
             }
         }
 
