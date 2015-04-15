@@ -16,6 +16,11 @@ class HoursCalculator{
 
         public function __construct($startTime = null, $endTime = null){
             //TODO fill recurring opening hours with the provided $startTime and $endTime as default values
+            $daysOfWeekReflection = new \ReflectionClass('Business\DaysOfWeek');
+            $daysOfWeek = $daysOfWeekReflection->getConstants();
+            foreach($daysOfWeek as $key => $num){
+                $this->recurringOpeningHours[$num] = compact('startTime', 'endTime');
+            }
         }
 
         // Validate provided date
@@ -89,19 +94,48 @@ class HoursCalculator{
             $workingDay = $date;
             if( !$this->isWorkingDay($date) ){
                 // TODO find next working day
-            }
-            if( in_array( $this->timeToDate($date), $this->exceptionOpeningHours ) ){
-                return $this->exceptionOpeningHours[$this->timeToDate($date)];
+                echo "non working day";
             }
 
-            if( in_array( $this->daysOfTheWeek($date), $this->recurringOpeningHours) ){
-                return $this->recurringOpeningHours[$this->daysOfTheWeek($date)];
+            if( isset( $this->exceptionOpeningHours[$this->timeToDate($workingDay)]) ){
+                return $this->exceptionOpeningHours[$this->timeToDate($workingDay)];
+            }
+
+            if( isset( $this->recurringOpeningHours[$this->dayOfTheWeek($workingDay)]) ){
+                return $this->recurringOpeningHours[$this->dayOfTheWeek($workingDay)];
             }
         }
 
         public function calculateDeadline($businessTime, $submitDate){
             if( is_int($businessTime) && $businessTime > 0 && $this->isValidDate($submitDate) ){
+                if( !$this->isWorkingDay($submitDate) ) {
+                    return $this->calculateDeadline($businessTime, date("Y-m-d H:i", strtotime($submitDate)+(24*60*60) ));
+                }
 
+                $workingTime = $this->getWorkingTime($submitDate);
+
+                if($workingTime){
+                    $curStartingDate = $this->timeToDate($submitDate)." ".$workingTime['startTime'];
+                    $curEndingDate = $this->timeToDate($submitDate)." ".$workingTime['endTime'];
+
+                    $baseTime = strtotime($submitDate);
+
+                    $diff = ( strtotime($submitDate) - strtotime($curStartingDate) ) / 60;
+
+                    if($diff > 0 ) {
+                        // after starting time
+
+                    } else {
+                        // before working time
+                        $baseTime = strtotime($curStartingDate);
+                    }
+
+                    if( $baseTime+$businessTime > strtotime($curEndingDate) ) {
+                        return $this->calculateDeadline($businessTime-( strtotime($curEndingDate) - $baseTime ), date("Y-m-d H:i", strtotime($curStartingDate)+(24*60*60) ) );
+                    } else {
+                        return date('Y-m-d H:i', ($baseTime+$businessTime) );
+                    }
+                }
             }
         }
 
@@ -109,18 +143,18 @@ class HoursCalculator{
             if( func_num_args() > 0 ){
                 $args = func_get_args();
                 array_walk($args, function( &$v, $key){
-                    echo $key." => ".print_r($v, true)."\n";
+                    echo $key." => <pre>".print_r($v, true)."</pre><br />\n";
                 });
             } else {
-                echo "recurring opening hours\n";
+                echo "recurring opening hours<br />\n";
                 echo "<pre>".print_r($this->recurringOpeningHours, true)."</pre>";
-                echo "exceptions opening hours\n";
+                echo "exceptions opening hours<br />\n";
                 echo "<pre>".print_r($this->exceptionOpeningHours, true)."</pre>";
 
-                echo "exceptions closed days\n";
+                echo "exceptions closed days<br />\n";
                 echo "<pre>".print_r($this->exceptionNonWorkingDays, true)."</pre>";
 
-                echo "recurring closed days\n";
+                echo "recurring closed days<br />\n";
                 echo "<pre>".print_r($this->recurringNonWorkingDays, true)."</pre>";
 
 
