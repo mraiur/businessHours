@@ -1,3 +1,4 @@
 vendor
 .phpcomplete_extended/
+public/bower_components
 bin
