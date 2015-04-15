@@ -58,6 +58,52 @@ class HoursCalculator{
             array_walk($arguments, [$this, "addClosed"]);
         }
 
+        private function timeToDate($date){
+            if( $this->isValidDate($date) ){
+                return date('Y-m-d', strtotime($date) );
+            }
+            return false;
+        }
+
+        private function dayOfTheWeek($date){
+            if( $this->isValidDate($date) ){
+                return date('N', strtotime($date));
+            }
+            return false;
+        }
+
+        private function isWorkingDay($date){
+            if( $this->isValidDate($date) ){
+                if( in_array( $this->timeToDate($date), $this->exceptionNonWorkingDays ) ){
+                    return false;
+                }
+
+                if( in_array( $this->dayOfTheWeek($date), $this->recurringNonWorkingDays )){
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private function getWorkingTime($date){
+            $workingDay = $date;
+            if( !$this->isWorkingDay($date) ){
+                // TODO find next working day
+            }
+            if( in_array( $this->timeToDate($date), $this->exceptionOpeningHours ) ){
+                return $this->exceptionOpeningHours[$this->timeToDate($date)];
+            }
+
+            if( in_array( $this->daysOfTheWeek($date), $this->recurringOpeningHours) ){
+                return $this->recurringOpeningHours[$this->daysOfTheWeek($date)];
+            }
+        }
+
+        public function calculateDeadline($businessTime, $submitDate){
+            if( is_int($businessTime) && $businessTime > 0 && $this->isValidDate($submitDate) ){
+
+            }
+        }
 
         public function debug(){
             if( func_num_args() > 0 ){
