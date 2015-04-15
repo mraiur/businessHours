@@ -41,8 +41,13 @@ class HoursCalculator{
             }
         }
 
+        private function addClosed($date){
+
+        }
+
         protected function setClosed(){
             $arguments = func_get_args();
+            array_walk($arguments, [$this, "addClosed"]);
         }
 
 
