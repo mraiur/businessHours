@@ -1,0 +1,8 @@
+{
+  "name": "App",
+  "dependencies": {
+    "bootstrap": "latest",
+    "datetimepicker": "latest",
+    "jquery-numeric": "latest"
+  }
+}
